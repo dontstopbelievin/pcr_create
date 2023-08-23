@@ -53,18 +53,15 @@ class PdfForm
 	public function makeFdf($data)
 	{
 
-	    $fdf = '%FDF-1.2
-	    1 0 obj<</FDF<< /Fields[';
+	    $fdf = '<?xml version="1.0" encoding="UTF-8"?>
+<xfdf xmlns="http://ns.adobe.com/xfdf/" xml:space="preserve">
+    <fields>';
 
 	    foreach ($data as $key => $value) {
-	        $fdf .= '<</T(' . $key . ')/V(' . $value . ')>>';
+	        $fdf .= '<field name="'.$key.'"><value>' . $value . '</value></field>';
 	    }
 
-	    $fdf .= "] >> >>
-	    endobj
-	    trailer
-	    <</Root 1 0 R>>
-	    %%EOF";
+	    $fdf .= "</fields></xfdf>";
 
 	    $fdf_file = $this->tmpfile();
 	    file_put_contents($fdf_file, $fdf);
@@ -83,7 +80,8 @@ class PdfForm
 
 	    $fdf = $this->makeFdf($this->data);
 	    $this->output = $this->tmpfile();
-	    exec("pdftk {$this->pdfurl} fill_form {$fdf} output {$this->output}{$this->flatten}");
+	    // return "pdftk {$this->pdfurl} fill_form {$fdf} output {$this->output} drop_xfa need_appearances {$this->flatten} replacement_font /var/www/pcr_create/public/helvetica_cyr_oblique.ttf";
+	    exec("pdftk {$this->pdfurl} fill_form {$fdf} output {$this->output} drop_xfa need_appearances flatten replacement_font /var/www/pcr_create/public/helvetica_cyr_oblique.ttf");
 
 	    unlink($fdf);
 	}
